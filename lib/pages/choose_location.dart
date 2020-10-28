@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:world_time/services/WorldTime.dart';
@@ -11,18 +10,18 @@ class ChooseLocation extends StatefulWidget {
 }
 
 class _ChooseLocationState extends State<ChooseLocation> {
-  List<dynamic>locations;
+  Future<List<dynamic>>locations;
 
-  InitiateData()async{
-
-    return json.decode((await get("http://worldtimeapi.org/api/timezone")).body);;
+  Future<List>InitiateData() async {
+    return json.decode(
+        (await get("http://worldtimeapi.org/api/timezone")).body);
   }
-  
-@override
+
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    InitiateData();
+    locations=InitiateData();
   }
 
   @override
@@ -32,37 +31,40 @@ class _ChooseLocationState extends State<ChooseLocation> {
         backgroundColor: Colors.grey[500],
         title: Text('Choose a location'),
         centerTitle: true,
-        elevation: 0 ,
+        elevation: 0,
       ),
-      body: FutureBuilder(
-
-       future:InitiateData(),
-        builder: (context,snapshot){
-              if(snapshot!=null){
-                return ListView.builder(
-                    itemCount: snapshot.data.length,
-                    itemBuilder: (context,index){
+      body: FutureBuilder<List>(
+        future: locations,
+        builder: (BuildContext context,AsyncSnapshot<List>snapshot){
+            if(snapshot.data != null){
+              return ListView.builder(
+                itemCount: snapshot.data.length,
+                  itemBuilder: (context,index){
                       return Card(
-                        child: ListTile(
-                          onTap: ()async{
-                            WorldTime ob=new WorldTime(location:snapshot.data[index],url: snapshot.data[index]);
-                            await ob.getData();
-                            Navigator.pop(context,{
-                              'location':ob.location,
-                              'time':ob.time,
-                              'isday':ob.isday
-                            });
-                          },
-                          title: Text(snapshot.data[index]),
-                        ),
+                          child: ListTile(
+                              onTap: ()async{
+                                WorldTime ob=new WorldTime(location:snapshot.data[index],url: snapshot.data[index]);
+                                await ob.getData();
+                                Navigator.pop(context,{
+                                'location':ob.location,
+                                  'time':ob.time,
+                                'isday':ob.isday
+                                  });
+                                  },
+                                title: Text(snapshot.data[index]),
+                              ),
+                            );
+                          }
                       );
-                    }
-                );
-              }
-              else  return CircularProgressIndicator();
-          },
 
-    ),
+                    }
+                      else{
+                          return Center(child: CircularProgressIndicator());
+                      }
+
+      },
+
+      ),
 
 
 
